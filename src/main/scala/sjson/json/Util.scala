@@ -57,7 +57,7 @@ object Util {
 		  !Modifier.isPublic(constructor.getDeclaringClass().getModifiers()))
         constructor.setAccessible(true)
 
-    val v = constructor.newInstance(null).asInstanceOf[T]
+    val v = constructor.newInstance().asInstanceOf[T]
     op(v)
     v
   }

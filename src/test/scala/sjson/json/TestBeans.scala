@@ -84,7 +84,7 @@ object TestBeans {
 
   @BeanInfo
   case class Book(id: Number, 
-             title: String, @JSONProperty("ISBN") isbn: String) {
+             title: String, @JSONProperty(value = "ISBN") isbn: String) {
   
     def this() = this(0, null, null)
     override def toString = "id = " + id + " title = " + title + " isbn = " + isbn
@@ -106,7 +106,7 @@ object TestBeans {
   case class Journal(id: BigDecimal, 
                      title: String, 
                      author: String, 
-                     @JSONProperty {val ignore = true} issn: String) {
+                     @JSONProperty(ignore = true) issn: String) {
 
     private def this() = this(0, null, null, null)
     override def toString =
@@ -121,7 +121,7 @@ object TestBeans {
   case class Journal_1(id: Int, 
                   title: String, 
                   author: String, 
-                  @JSONProperty {val ignoreIfNull = true} issn: String) {
+                  @JSONProperty(ignoreIfNull = true) issn: String) {
   }
 
   @BeanInfo
@@ -130,7 +130,7 @@ object TestBeans {
     val title = t
     val author = au
   
-    @JSONProperty("ISSN") {val ignoreIfNull = true}
+    @JSONProperty(value = "ISSN", ignoreIfNull = true)
     val issn = is
   }
 
@@ -154,7 +154,7 @@ object TestBeans {
   case class Instrument(
     val id: Number, 
     val name: String, 
-    @JSONProperty("TYPE"){val ignoreIfNull = false, val ignore = false}
+    @JSONProperty(value = "TYPE", ignoreIfNull = false, ignore = false)
     val typ: String) {
     
     private def this() = this(null, null, null)
@@ -164,7 +164,7 @@ object TestBeans {
   @BeanInfo
   case class Trade(
     val ref: String,
-    @JSONProperty("Instrument"){val ignoreIfNull = false, val ignore = false}
+    @JSONProperty(value = "Instrument", ignoreIfNull = false, ignore = false)
     val ins: Instrument,
     val amount: Number) {
       
@@ -182,14 +182,14 @@ object TestBeans {
     val id: Number,
     val name: String,
     
-    @JSONProperty("Previous Employer"){val ignoreIfNull = true, val ignore = false}
+    @JSONProperty(value = "Previous Employer", ignoreIfNull = true, ignore = false)
     val prevEmployer: String,
     
-    @JSONProperty("Addresses")
+    @JSONProperty(value = "Addresses")
     @JSONTypeHint(classOf[Address])
     val addresses: List[Address],
     
-    @JSONProperty("Salary")
+    @JSONProperty(value = "Salary")
     val sal: Salary
   ) {
     private def this() = this(null, null, null, Nil, null)

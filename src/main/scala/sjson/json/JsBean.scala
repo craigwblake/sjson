@@ -197,7 +197,7 @@ object JsBean {
           for {
             pd <- pds
             val rm = pd.getReadMethod
-            val rv = rm.invoke(obj, null)
+            val rv = rm.invoke(obj)
             
             // Option[] needs to be treated differently
             val isOption = rv.isInstanceOf[Option[_]]
