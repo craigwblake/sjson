@@ -67,6 +67,8 @@ object Serializer {
         Js(json)
       case "scala.runtime.Nothing$" =>
         Js(json)
+      case "Nothing" =>
+        Js(json)
       case "None.type" =>
         Js(json)
       case _ =>

@@ -33,10 +33,20 @@ object JsBean {
     if (!js.isInstanceOf[JsObject] || !context.isDefined) js.self.asInstanceOf[T]
     else {
       val m = js.self.asInstanceOf[Map[JsString, JsValue]]
-      val fields = context.get.getDeclaredFields
+      // val fields = context.get.getDeclaredFields
+      val fields = context.get.getMethods
+
+      // println("fields = ")
+      // fields.map(_.getAnnotation(classOf[JSONProperty])).foreach(println)
     
       // property names for the bean
       val props = fields map(_.getName)
+
+      // println("props = ")
+      // props.foreach(println)
+
+      // println("methods = ")
+      // context.get.getMethods.map(m => (m.getName, m.getAnnotation(classOf[JSONProperty]))).foreach(println)
 
       /**
        * for some bean properties, json property may have different names by virtue of
@@ -48,6 +58,7 @@ object JsBean {
           if (a.getAnnotation(classOf[JSONProperty]) != null)
             b + (a.getAnnotation(classOf[JSONProperty]).value -> a.getName)
           else b)
+        // println("annotated props = " + annotatedProps)
     
       val info = m.map {e =>
         e._2.self match {
