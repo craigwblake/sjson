@@ -109,7 +109,7 @@ object Serializer {
     }
   }
 
-  object SJSON extends SJSON {
+  object SJSON extends SJSON with DefaultConstructor {
     val classLoader = Some(this.getClass.getClassLoader)
   }
 }
