@@ -249,11 +249,7 @@
     <dependency>
       <groupId>org.scalatest</groupId>
       <artifactId>scalatest</artifactId>
-<<<<<<< HEAD:pom.xml
       <version>1.0.1-for-scala-2.8.0.Beta1-RC1-SNAPSHOT</version>
-=======
-      <version>1.0</version>
->>>>>>> master:pom.xml
       <scope>test</scope>
     </dependency>
     <dependency>
