@@ -4,18 +4,31 @@ package sjson.json
  * @author <a href="http://debasishg.blogspot.com">Debasish Ghosh</a>
  */
 object Serializer {
-  object SJSON {
+  trait SJSON {
   
     import dispatch.json._
     import dispatch.json.Js._
     import Implicits._
-  
+    import java.io.{ObjectInputStream, ObjectOutputStream, ByteArrayInputStream, ByteArrayOutputStream}
+    import org.apache.commons.io.input.ClassLoaderObjectInputStream
+
+    val classLoader: Option[ClassLoader]
+
     import scala.reflect.Manifest
     def deepClone[T](obj: T)(implicit m: Manifest[T]): AnyRef = in[T](out(obj.asInstanceOf[AnyRef]))
   
     /**
-     * Serialize out a Scala object into JSON.
+     * Serialize out a Scala object. It can be serialized back in to the object using
+     * <tt>in</tt> method.
      * <p/>
+     * <pre>
+     * val l = List("ab", "cd")
+     * in(out(l)) => ["ab", "cd"]
+     * in[List[String]](out(l)) => List("ab", "cd")
+     * </pre>
+     * <em>Warning:</em>
+     * Converting the output <tt>Array[Byte]</tt> to <tt>String</tt> will not give a valid JSON string. To
+     * get a valid JSON string of an object, use <tt>#toJSON</tt>
      * <em>Caveat</em>
      * Nulls are serialized as String null ("null"). This may create problems if a String field
      * contains the value "null".
@@ -32,7 +45,7 @@ object Serializer {
     def in[T](bytes: Array[Byte])(implicit m: Manifest[T]): AnyRef = {
       in[T](new String(bytes, "UTF-8"))(m)
     }
-    
+
     /**
      * Serialize in a JSON into a Scala object. 
      * <p/>
@@ -75,7 +88,30 @@ object Serializer {
         JsBean.fromJSON(Js(json), Some(m.erasure)).asInstanceOf[AnyRef]
     }
 
-    // def in(json: String): AnyRef = Js(json) 
+    /**
+     * Serialize in a JSON into a Scala object, specifying a class that can be loaded
+     * through an externally specified class loader. 
+     * In order to specify the class loader, do the following :
+     * <pre>
+     * object SJSON extends SJSON {
+     *   val classLoader = None
+     * }
+     * </pre>
+     */
+    def in(json: Array[Byte], clazzName: String): AnyRef = {
+      val clazz =
+        classLoader match {
+          case Some(cl) =>
+            Class.forName(clazzName, true, cl)
+          case None =>
+            Class.forName(clazzName)
+        }
+      JsBean.fromJSON(Js(new String(json)), Some(clazz)).asInstanceOf[AnyRef]
+    }
+  }
+
+  object SJSON extends SJSON {
+    val classLoader = Some(this.getClass.getClassLoader)
   }
 }
   
