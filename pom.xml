@@ -245,6 +245,11 @@
       <artifactId>dispatch-json_2.8.0.Beta1-RC1</artifactId>
       <version>0.6.4</version>
     </dependency>
+    <dependency>
+      <groupId>org.objenesis</groupId>
+      <artifactId>objenesis</artifactId>
+      <version>1.2</version>
+    </dependency>
     <!-- For Testing -->
     <dependency>
       <groupId>org.scalatest</groupId>
