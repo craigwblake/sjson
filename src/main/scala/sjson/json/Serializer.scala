@@ -75,6 +75,8 @@ object Serializer {
      * which is how we serialize nulls in sjson.
      */
     def in[T](json: String)(implicit m: Manifest[T]): AnyRef = m.toString match {
+      case "Object" =>
+        Js(json)
       case "java.lang.Object" =>
         Js(json)
       case "scala.runtime.Nothing$" =>
