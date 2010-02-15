@@ -20,7 +20,6 @@ trait JsBean {
   
   import java.beans._
   
-  import java.lang.reflect._
   import dispatch.json._
   import dispatch.json.Js._
   import Util._
@@ -33,20 +32,10 @@ trait JsBean {
     if (!js.isInstanceOf[JsObject] || !context.isDefined) js.self.asInstanceOf[T]
     else {
       val m = js.self.asInstanceOf[Map[JsString, JsValue]]
-      // val fields = context.get.getDeclaredFields
       val fields = context.get.getMethods
 
-      // println("fields = ")
-      // fields.map(_.getAnnotation(classOf[JSONProperty])).foreach(println)
-    
       // property names for the bean
       val props = fields map(_.getName)
-
-      // println("props = ")
-      // props.foreach(println)
-
-      // println("methods = ")
-      // context.get.getMethods.map(m => (m.getName, m.getAnnotation(classOf[JSONProperty]))).foreach(println)
 
       /**
        * for some bean properties, json property may have different names by virtue of
@@ -58,7 +47,6 @@ trait JsBean {
           if (a.getAnnotation(classOf[JSONProperty]) != null)
             b + (a.getAnnotation(classOf[JSONProperty]).value -> a.getName)
           else b)
-        // println("annotated props = " + annotatedProps)
     
       val info = m.map {e =>
         e._2.self match {
@@ -143,6 +131,11 @@ trait JsBean {
               val num = 
                 if (z.isInstanceOf[BigDecimal]) mkNum(z.asInstanceOf[BigDecimal], y.getType) 
                 else if (y.getType.isAssignableFrom(classOf[java.util.Date])) mkDate(z.asInstanceOf[String])
+
+                // need to handle differently with 2.8 : no more boxing in arrays
+                else if (y.getType.isArray) 
+                  mkArray(z.asInstanceOf[List[Any]], y.getType.getComponentType)
+                  
                 else if (z.isInstanceOf[String] && (z == "null")) null
                 else z
 
@@ -180,6 +173,13 @@ trait JsBean {
       // handle sequences & maps
       else if (obj.isInstanceOf[Seq[_ <: AnyRef]]) {
         obj.asInstanceOf[Seq[_ <: AnyRef]]
+           .map(e => toJSON(e))
+           .mkString("[", ",", "]")
+      }
+
+      // handle sequences & maps
+      else if (obj.isInstanceOf[Array[_ <: AnyRef]]) {
+        obj.asInstanceOf[Array[_ <: AnyRef]]
            .map(e => toJSON(e))
            .mkString("[", ",", "]")
       }

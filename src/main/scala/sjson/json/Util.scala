@@ -59,5 +59,16 @@ object Util {
   def mkDate(v: String): Date = {
     new Date(v.toLong.longValue)
   }
+
+  def mkArray(l: List[_], clz: Class[_]): Array[_] = {
+    import java.lang.reflect._
+    val a = Array.newInstance(clz, l.size)
+    var i = 0
+    while (i < l.size) {
+        Array.set(a, i, l(i))
+        i += 1
+    }
+    a.asInstanceOf[scala.Array[_]]
+  }
 }
 
