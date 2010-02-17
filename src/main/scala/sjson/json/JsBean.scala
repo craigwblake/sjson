@@ -90,17 +90,24 @@ trait JsBean {
                     Map() ++ 
                       (ann match {
                         case null => {
-                          e._2.self.asInstanceOf[Map[_, _]]
-                                   .map(y => (y._1.asInstanceOf[JsValue].self, y._2.asInstanceOf[JsValue].self))
+                          x.asInstanceOf[Map[_, _]]
+                           .map(y => (y._1.asInstanceOf[JsValue].self, y._2.asInstanceOf[JsValue].self))
                           }
                         case _ =>
-                          e._2.self.asInstanceOf[Map[_, _]]
-                                   .map(y => (y._1.asInstanceOf[JsValue].self, fromJSON(y._2.asInstanceOf[JsValue], Some(ann.value))))
+                          x.asInstanceOf[Map[_, _]]
+                           .map(y => (y._1.asInstanceOf[JsValue].self, fromJSON(y._2.asInstanceOf[JsValue], Some(ann.value))))
                       }))
                     
             } else {
-              // data member is an object which comes as Map in JSON
-              (Some(context.get.getDeclaredField(e._1.self)), fromJSON(e._2.asInstanceOf[JsValue], Some(inner)))
+              if (inner.isAssignableFrom(classOf[Tuple2[_, _]])) {
+                // fixme: ignoring annotations and generic types for the time being
+                val tup = x.asInstanceOf[Map[_, _]].toList.first.asInstanceOf[Tuple2[_, _]]
+                (Some(context.get.getDeclaredField(e._1.self)), 
+                  (tup._1.asInstanceOf[JsValue].self, tup._2.asInstanceOf[JsValue].self))
+              }
+              else
+                // data member is an object which comes as Map in JSON
+                (Some(context.get.getDeclaredField(e._1.self)), fromJSON(e._2.asInstanceOf[JsValue], Some(inner)))
             }
           }
           
@@ -258,6 +265,8 @@ trait DefaultConstructor {
     v
   }
 }
+
+object JsBean extends JsBean with DefaultConstructor
 
 /**
  * Use this trait with JsBean to instantiate classes using Objenesis. 
