@@ -1,5 +1,8 @@
 package sjson.json
 
+import java.text.SimpleDateFormat
+import java.util.TimeZone
+
 object Util {
   def quote(s: String): String = s match {
     case null => "null"
@@ -55,9 +58,30 @@ object Util {
     else v
   }
 
+  /**
+   * Tries to read date as millis since epoch, and if this fails
+   * will attempt to read as an ISO8660 date. Note that any timezone
+   * info will be lost, so only use with dates that are consistently
+   * converted to a known timezone, e.g. UTC.
+   */
   import java.util.Date
   def mkDate(v: String): Date = {
-    new Date(v.toLong.longValue)
+    try {
+      new Date(v.toLong.longValue)
+    } catch {
+      case e: NumberFormatException =>
+        val corrected = v.substring(0, v.length() - 3) + v.substring(v.length() - 2)
+        new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'").parse(corrected)
+    }
+  }
+
+  /**
+   * Formats the date as an ISO8660 string, which supports
+   * lexicographic sorting.
+   */
+  def outputDate(v: Date): String = {
+    val result = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'").format(v)
+    result.substring(0, result.length() - 2) + ":" + result.substring(result.length() - 2)
   }
 }
 
