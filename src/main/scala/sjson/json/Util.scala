@@ -83,5 +83,8 @@ object Util {
     val result = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'").format(v)
     result.substring(0, result.length() - 2) + ":" + result.substring(result.length() - 2)
   }
+
+  def fromTimezone(v: TimeZone): String = v.getID
+  def toTimezone(v: String): TimeZone = TimeZone.getTimeZone( v)
 }
 
