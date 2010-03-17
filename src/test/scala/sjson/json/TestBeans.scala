@@ -1,6 +1,9 @@
 package sjson.json
 
+import java.util.TimeZone
 import scala.reflect._
+
+object TestEnum extends Enumeration { val One = Value( "One")}
 
 object TestBeans {
   @BeanInfo
@@ -257,5 +260,16 @@ object TestBeans {
     val value: Tuple2[String, Shop]) {
     private def this() = this(null, null)
   }
+
+  val EnumClass = TestEnum.getClass
+  @BeanInfo
+  case class EnumBean(
+    //@EnumTypeHint( EnumClass) val value: TestEnum.Value
+   )
+
+  @BeanInfo
+  case class TimeZoneBean(
+    val value: TimeZone
+   )
 }
 

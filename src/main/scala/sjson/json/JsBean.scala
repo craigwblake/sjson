@@ -1,6 +1,7 @@
 package sjson.json
 
 import dispatch.json._
+import java.util.TimeZone
 
 trait JsBean {
   
@@ -97,7 +98,7 @@ trait JsBean {
           // need to ignore properties in json that are not in props
           case x if (props.get(name).isDefined == false) =>
             (None, null)
-        
+
           /**
            * Can be a Map in any of the following cases:
            * 1. the data member is really a scala.Collection.Map 
@@ -161,10 +162,14 @@ trait JsBean {
                 if (z.isInstanceOf[BigDecimal]) mkNum(z.asInstanceOf[BigDecimal], y.getType) 
 
                 // if it's timezone, need to make one from JSON string
-                else if (y.getType.isAssignableFrom(classOf[java.util.TimeZone])) toTimezone(z.asInstanceOf[String])
+                else if (y.getType.isAssignableFrom(classOf[java.util.TimeZone])) TimeZone.getTimeZone(z.asInstanceOf[String])
 
                 // if it's date, need to make one from JSON string
                 else if (y.getType.isAssignableFrom(classOf[java.util.Date])) mkDate(z.asInstanceOf[String])
+
+                else if (y.getType.isAssignableFrom(classOf[Enumeration#Value])) {
+                  ""
+                }
 
                 // as ugly as it gets
                 // arrays in Scala are boxed sometimes: need to unbox before set
@@ -198,7 +203,7 @@ trait JsBean {
     case (n: Number) => obj.toString
     case (b: java.lang.Boolean) => obj.toString
     case (s: String) => quote(obj.asInstanceOf[String])
-    case (d: java.util.TimeZone) => Util.fromTimezone( d)
+    case (d: java.util.TimeZone) => quote(d.getID)
     case (d: java.util.Date) => 
       quote(obj.asInstanceOf[java.util.Date].getTime.toString)
 
