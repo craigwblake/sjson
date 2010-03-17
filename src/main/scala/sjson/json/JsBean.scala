@@ -75,7 +75,7 @@ trait JsBean {
           (t1.self, fromJSON(t2, Some(ann.value)))
        }))
   }
-  
+
   /**
    * Convert the <tt>JsValue</tt> to an instance of the class <tt>context</tt>. Returns an instance of
    * <tt>T</tt>.
@@ -160,6 +160,9 @@ trait JsBean {
                 // json parser makes BigDecimal out of all numbers
                 if (z.isInstanceOf[BigDecimal]) mkNum(z.asInstanceOf[BigDecimal], y.getType) 
 
+                // if it's timezone, need to make one from JSON string
+                else if (y.getType.isAssignableFrom(classOf[java.util.TimeZone])) toTimezone(z.asInstanceOf[String])
+
                 // if it's date, need to make one from JSON string
                 else if (y.getType.isAssignableFrom(classOf[java.util.Date])) mkDate(z.asInstanceOf[String])
 
@@ -195,8 +198,11 @@ trait JsBean {
     case (n: Number) => obj.toString
     case (b: java.lang.Boolean) => obj.toString
     case (s: String) => quote(obj.asInstanceOf[String])
+    case (d: java.util.TimeZone) => Util.fromTimezone( d)
     case (d: java.util.Date) => 
       quote(obj.asInstanceOf[java.util.Date].getTime.toString)
+
+    case (v: Enumeration#Value) => v toString
 
     case (s: Seq[AnyRef]) =>
       s.map(e => toJSON(e)).mkString("[", ",", "]")
@@ -258,21 +264,44 @@ trait JsBean {
  * Use this trait with JsBean to instantiate classes using a default private constructor. This is the default.
  */
 trait DefaultConstructor {
-  import java.lang.reflect._
+  import java.lang.reflect.{Modifier,Array=>JArray}
 
   def newInstance[T](clazz: Class[T])(op: T => Unit): T = {
     // need to access private default constructor .. hack!
     // clazz.getDeclaredConstructors.foreach(println)
-    val constructor =
-      clazz.getDeclaredConstructors.filter(_.getParameterTypes.length == 0).first
 
-     if (!Modifier.isPublic(constructor.getModifiers()) ||
+    val constructor = clazz.getDeclaredConstructors.filter(_.getParameterTypes.length == 0).toList match {
+      case Nil => clazz.getConstructors.first
+      case list => list.first
+    }
+
+    if (!Modifier.isPublic(constructor.getModifiers()) ||
       !Modifier.isPublic(constructor.getDeclaringClass().getModifiers()))
         constructor.setAccessible(true)
 
-    val v = constructor.newInstance().asInstanceOf[T]
+    val args = mkArgs( constructor.getParameterTypes.toList)
+
+    val v = args match {
+      case Nil => constructor.newInstance().asInstanceOf[T]
+      case list => constructor.newInstance(list.toArray: _*).asInstanceOf[T]
+    }
     op(v)
     v
+  }
+
+  def mkArgs( v: List[ Class[ _]]): List[ AnyRef] = v match {
+    case Nil => Nil
+    case x :: xs =>
+      val result: AnyRef = x match {
+        case x if x == classOf[Int] => new Integer(0)
+        case x if x == classOf[Long] => new java.lang.Long(0)
+        case x if x == classOf[Float] => new java.lang.Float(0)
+        case x if x == classOf[Boolean] => java.lang.Boolean.FALSE
+        case x if x == classOf[Option[_]] => None
+        case x if x.isArray => JArray.newInstance( x.getComponentType, 0)
+        case x => null
+      }
+      result :: mkArgs( xs)
   }
 }
 
