@@ -337,11 +337,7 @@ class SerializerSpec extends Spec with ShouldMatchers {
   describe("Serialization of date") {
     it("should serialize properly") {
       val t = SecurityTrade("T-123", new Date, new Date, 1000)
-	  val interim = serializer.out(t)
-	  println( "SecurityTrade: " + new String(interim))
-	  val expected = serializer.in[SecurityTrade](interim).asInstanceOf[SecurityTrade]
-	  println( "final: " + expected)
-      expected should equal(t)
+	  serializer.in[SecurityTrade](serializer.out(t)).asInstanceOf[SecurityTrade] should equal(t)
     }
   }
 
