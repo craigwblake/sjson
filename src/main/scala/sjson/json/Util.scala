@@ -75,10 +75,12 @@ object Util {
 
   /**
    * Formats the date as an ISO8660 string, which supports
-   * lexicographic sorting.
+   * lexicographic sorting. Dates are formatted in the UTC timezone.
    */
   def outputDate(v: Date): String = {
-    val result = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(v)
+    val format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+	format.setTimeZone(TimeZone.getTimeZone("UTC"))
+	val result = format.format(v)
     result.substring(0, result.length() - 2) + ":" + result.substring(result.length() - 2)
   }
 }
