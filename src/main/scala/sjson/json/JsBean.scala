@@ -4,6 +4,8 @@ import dispatch.json._
 import java.util.TimeZone
 
 trait JsBean {
+
+  val Name = ".*[.](.*)".r
   
   implicit def string2Class[T<:AnyRef](name: String)(implicit classLoader: ClassLoader): Class[T] = {
     val clazz = Class.forName(name, true, classLoader)
@@ -210,7 +212,8 @@ trait JsBean {
     case (s: String) => quote(obj.asInstanceOf[String])
     case (d: java.util.TimeZone) => quote(d.getID)
     case (d: java.util.Date) => 
-      quote(obj.asInstanceOf[java.util.Date].getTime.toString)
+      quote(Util.outputDate(obj.asInstanceOf[java.util.Date]))
+      //quote(obj.asInstanceOf[java.util.Date].getTime.toString)
 
     case (v: Enumeration#Value) => quote(v toString)
 
@@ -239,9 +242,10 @@ trait JsBean {
       if (pds.isEmpty) {
         throw new UnsupportedOperationException("Class " + clazz + " not supported for conversion")
       }
-        
-      val props = 
-        for {
+
+      val Name( name) = clazz.getName
+      val props = (toJSON("type") + ":" + toJSON(name)) :: 
+        (for {
           pd <- pds
           val rm = pd.getReadMethod
           val rv = rm.invoke(obj, null)
@@ -261,7 +265,7 @@ trait JsBean {
             if (ann != null) ann.ignore || (rv == null && ann.ignoreIfNull) else false
 
           if ((ignore == false) && (!isOption || (isOption && rval != null)))
-        } yield toJSON(v) + ":" + toJSON(rval)
+        } yield toJSON(v) + ":" + toJSON(rval)).toList
       
       props.mkString("{", ",", "}")
     }

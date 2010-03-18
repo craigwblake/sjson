@@ -337,7 +337,11 @@ class SerializerSpec extends Spec with ShouldMatchers {
   describe("Serialization of date") {
     it("should serialize properly") {
       val t = SecurityTrade("T-123", new Date, new Date, 1000)
-      serializer.in[SecurityTrade](serializer.out(t)).asInstanceOf[SecurityTrade] should equal(t)
+	  val interim = serializer.out(t)
+	  println( "SecurityTrade: " + new String(interim))
+	  val expected = serializer.in[SecurityTrade](interim).asInstanceOf[SecurityTrade]
+	  println( "final: " + expected)
+      expected should equal(t)
     }
   }
 
@@ -378,7 +382,7 @@ class SerializerSpec extends Spec with ShouldMatchers {
     it("should serialize an object with Tuple2") {
       val message = MyMessage("id", ("hello", 34))
       val json = serializer.out(message)
-      new String(json) should equal("""{"id":"id","value":{"hello":34}}""")
+      new String(json) should equal("""{"type":"TestBeans$MyMessage","id":"id","value":{"hello":34}}""")
       val f = serializer.in[MyMessage](json).asInstanceOf[MyMessage]
       f should equal(message)
     }
@@ -403,7 +407,7 @@ class SerializerSpec extends Spec with ShouldMatchers {
     it("should serialize an object with Tuple2") {
       val message = MyMessage("id", ("hello", 34))
       val json = new String(MySJSON.out(message))
-      json should equal("""{"id":"id","value":{"hello":34}}""")
+      json should equal("""{"type":"TestBeans$MyMessage","id":"id","value":{"hello":34}}""")
     }
   }
 
@@ -447,7 +451,7 @@ class SerializerSpec extends Spec with ShouldMatchers {
     it ("should do proper Array serialization") {
       val a = ArrayTest(100, "debasish", Array("a", "b", "c"))
       val out = serializer.out(a)
-      new String(out) should equal("""{"addresses":["a","b","c"],"id":100,"name":"debasish"}""")
+      new String(out) should equal("""{"type":"TestBeans$ArrayTest","addresses":["a","b","c"],"id":100,"name":"debasish"}""")
       val in = serializer.in[ArrayTest](out)
       in.asInstanceOf[ArrayTest].addresses should equal(Array("a", "b", "c"))
     }
