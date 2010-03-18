@@ -168,7 +168,12 @@ trait JsBean {
                 else if (y.getType.isAssignableFrom(classOf[java.util.Date])) mkDate(z.asInstanceOf[String])
 
                 else if (y.getType.isAssignableFrom(classOf[Enumeration#Value])) {
-                  ""
+                  y.getAnnotation(classOf[EnumTypeHint]) match {
+                    case null => println("Found no annotation!")
+                    case an =>
+                      val method = Class.forName(an.value).getMethod( "valueOf", scala.Array[Class[_]](classOf[String]): _*)
+                      method.invoke(null, scala.Array[String](z.asInstanceOf[String]): _*).asInstanceOf[Option[Enumeration#Value]].get
+                  }
                 }
 
                 // as ugly as it gets
@@ -207,7 +212,7 @@ trait JsBean {
     case (d: java.util.Date) => 
       quote(obj.asInstanceOf[java.util.Date].getTime.toString)
 
-    case (v: Enumeration#Value) => v toString
+    case (v: Enumeration#Value) => quote(v toString)
 
     case (s: Seq[AnyRef]) =>
       s.map(e => toJSON(e)).mkString("[", ",", "]")

@@ -326,6 +326,13 @@ class SerializerSpec extends Spec with ShouldMatchers {
     }
   }
 
+  describe("Serialization of enumerations") {
+    it("should serialize properly") {
+      val b = EnumBean( TestEnum.One)
+      serializer.in[EnumBean](serializer.out(b)).asInstanceOf[EnumBean] should equal(b)
+    }
+  }
+
   import java.util.Date
   describe("Serialization of date") {
     it("should serialize properly") {
