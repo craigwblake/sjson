@@ -1,5 +1,6 @@
 package sjson.json
 
+import java.util.TimeZone
 import dispatch.json._
 import java.util.TimeZone
 
@@ -169,12 +170,14 @@ trait JsBean {
                 // if it's date, need to make one from JSON string
                 else if (y.getType.isAssignableFrom(classOf[java.util.Date])) mkDate(z.asInstanceOf[String])
 
+                // process Enumerations
                 else if (y.getType.isAssignableFrom(classOf[Enumeration#Value])) {
                   y.getAnnotation(classOf[EnumTypeHint]) match {
-                    case null => println("Found no annotation!")
+                    case null => 
+                      throw new IllegalArgumentException("cannot get type information for enum " + z)
                     case an =>
-                      val method = Class.forName(an.value).getMethod( "valueOf", scala.Array[Class[_]](classOf[String]): _*)
-                      method.invoke(null, scala.Array[String](z.asInstanceOf[String]): _*).asInstanceOf[Option[Enumeration#Value]].get
+                      val method = Class.forName(an.value).getMethod("valueOf", classOf[String])
+                      method.invoke(null, z.asInstanceOf[String]).asInstanceOf[Option[Enumeration#Value]].get
                   }
                 }
 
@@ -215,7 +218,10 @@ trait JsBean {
       quote(Util.outputDate(obj.asInstanceOf[java.util.Date]))
       //quote(obj.asInstanceOf[java.util.Date].getTime.toString)
 
-    case (v: Enumeration#Value) => quote(v toString)
+    case (d: java.util.TimeZone) => quote(d.getID)
+
+    case (v: Enumeration#Value) => 
+      quote(v toString)
 
     case (s: Seq[AnyRef]) =>
       s.map(e => toJSON(e)).mkString("[", ",", "]")

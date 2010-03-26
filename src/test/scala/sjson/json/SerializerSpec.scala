@@ -328,8 +328,13 @@ class SerializerSpec extends Spec with ShouldMatchers {
 
   describe("Serialization of enumerations") {
     it("should serialize properly") {
-      val b = EnumBean( TestEnum.One)
-      serializer.in[EnumBean](serializer.out(b)).asInstanceOf[EnumBean] should equal(b)
+      // val b = EnumTest( TestEnum.One)
+      import WeekDay._
+      import Shape._
+      val b = EnumTest(Mon, Circle, List(Mon, Tue, Wed))
+      val o = serializer.in[EnumTest](serializer.out(b)).asInstanceOf[EnumTest] 
+      b.start should equal(o.start)
+      b.shape should equal(o.shape)
     }
   }
 
