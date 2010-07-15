@@ -214,7 +214,6 @@ trait JsBean {
     case (d: java.util.TimeZone) => quote(d.getID)
     case (d: java.util.Date) => 
       quote(Util.outputDate(obj.asInstanceOf[java.util.Date]))
-      //quote(obj.asInstanceOf[java.util.Date].getTime.toString)
 
     case (v: Enumeration#Value) => 
       quote(v toString)
