@@ -186,9 +186,7 @@ trait JsBean {
                 // kludge to take care of the fact that both array and List have the same JSON representation
                 // here the field is an Array but the value is a List
                 else if (y.getType.isArray) {
-                  z.asInstanceOf[List[_]]
-                   .toArray.asInstanceOf[scala.runtime.BoxedAnyArray]
-                   .unbox(y.getType.getComponentType)
+                  z.asInstanceOf[List[Any]].toArray
                 }
                   
                 // special treatment for JSON "nulls"
