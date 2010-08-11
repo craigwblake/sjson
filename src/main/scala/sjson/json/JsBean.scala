@@ -298,11 +298,8 @@ trait DefaultConstructor {
   def newInstance[T](clazz: Class[T])(op: T => Unit): T = {
     // need to access private default constructor .. hack!
     // clazz.getDeclaredConstructors.foreach(println)
-<<<<<<< HEAD
-=======
     val constructor =
       clazz.getDeclaredConstructors.filter(_.getParameterTypes.length == 0).head
->>>>>>> 034d1ae1b8924c624659a4c322ef63077a8236e7
 
     val constructor = clazz.getDeclaredConstructors.filter(_.getParameterTypes.length == 0).toList match {
       case Nil => clazz.getConstructors.first
