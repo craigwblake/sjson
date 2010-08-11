@@ -1,4 +1,5 @@
-package sjson.json
+package sjson
+package json
 
 import java.text.SimpleDateFormat
 import java.util.TimeZone
